@@ -1,0 +1,14 @@
+{
+  "ramadan": {
+    "isEnabled": true,
+    "startDate": "2026-02-19",
+    "endDate": "2026-03-20",
+    "startTime": "00:00",
+    "endTime": "23:59"
+  },
+  "storeInfo": {
+    "name": "Al-Nimah Kitchen",
+    "upiId": "your-upi-id@okaxis",
+    "whatsappNumber": "919347025134" 
+  }
+}
