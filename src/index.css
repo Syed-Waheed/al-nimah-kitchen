@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Remove blue tap highlight and focus ring globally */
+/* Global Reset & Focus Handling */
 * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -13,22 +13,53 @@
   outline: none;
 }
 
-body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #021808;
-  color: white;
-
-  background-image: 
-    radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.1) 0%, transparent 40%);
-  background-attachment: fixed;
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevents side scrolling */
 }
 
-/* Hide scrollbar */
+body {
+  font-family: 'Poppins', sans-serif;
+  color: white;
+  
+  /* --- THE MAGIC BACKGROUND FIX --- */
+  background-color: #020a05; /* Deepest Dark Green Base */
+  
+  /* This recreates your blobs but smoother and full-screen */
+  background-image: 
+    /* Top Left Emerald Glow */
+    radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.25) 0%, transparent 50%),
+    /* Bottom Right Gold/Amber Glow */
+    radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.15) 0%, transparent 50%);
+    
+  background-attachment: fixed; /* Keeps background static while you scroll */
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+/* Hide scrollbar but keep functionality */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Smooth Fade In Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
 }

@@ -3,15 +3,24 @@ import { X, Plus, Minus } from 'lucide-react';
 import config from '../config/menu.config.json';
 
 const CartSheet = ({ cart, total, onAdd, onRemove, onClose }) => {
+
   const placeOrder = () => {
     const phone = config.storeInfo.whatsappNumber;
+
     let message = `New Order\n\n`;
+
     cart.forEach(i => {
       message += `• ${i.qty} x ${i.name} (₹${i.qty * i.price})\n`;
     });
+
     message += `\nTotal to Pay: ₹${total}\nPlease confirm order & delivery time.`;
+
     const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+
+    window.open(
+      `https://wa.me/${phone}?text=${encoded}`,
+      '_blank'
+    );
   };
 
   return (
@@ -20,22 +29,32 @@ const CartSheet = ({ cart, total, onAdd, onRemove, onClose }) => {
 
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold">Your Order</h3>
-          <button onClick={onClose}><X /></button>
+          <button onClick={onClose}>
+            <X />
+          </button>
         </div>
 
         <div className="space-y-4 mb-6">
           {cart.map(item => (
             <div key={item.id} className="flex justify-between">
+
               <div>
                 <p className="font-medium">{item.name}</p>
                 <p className="text-sm opacity-70">₹{item.price}</p>
               </div>
 
               <div className="flex items-center gap-2">
-                <button onClick={() => onRemove(item.id)}><Minus size={14} /></button>
+                <button onClick={() => onRemove(item.id)}>
+                  <Minus size={14} />
+                </button>
+
                 <span>{item.qty}</span>
-                <button onClick={() => onAdd(item)}><Plus size={14} /></button>
+
+                <button onClick={() => onAdd(item)}>
+                  <Plus size={14} />
+                </button>
               </div>
+
             </div>
           ))}
         </div>
@@ -51,6 +70,7 @@ const CartSheet = ({ cart, total, onAdd, onRemove, onClose }) => {
         >
           Place Order on WhatsApp
         </button>
+
       </div>
     </div>
   );

@@ -9,14 +9,17 @@ const CartModal = ({ cart, total, onClose, onAdd, onRemove }) => {
   const handlePlaceOrder = () => {
     setShowRedirectNote(true);
     const phoneNumber = config.storeInfo.whatsappNumber;
-    // Build plain text first (newlines, •, ₹), then encode once to avoid broken characters
+
     let message = `New Order\n\n`;
-    cart.forEach(item => {
+    cart.forEach((item) => {
       message += `• ${item.qty} x ${item.name} (₹${item.price * item.qty})\n`;
     });
+
     message += `\nTotal to Pay: ₹${total}\nPlease confirm order & delivery time.`;
+
     const encoded = encodeURIComponent(message);
     const url = `https://wa.me/${phoneNumber}?text=${encoded}`;
+
     setTimeout(() => {
       window.open(url, '_blank');
       onClose();
@@ -25,13 +28,10 @@ const CartModal = ({ cart, total, onClose, onAdd, onRemove }) => {
 
   return createPortal(
     <div
-      className="flex items-end justify-center isolate outline-none focus:outline-none focus-visible:outline-none"
+      className="flex items-end justify-center isolate"
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         width: '100%',
         height: '100%',
         minHeight: '100dvh',
@@ -41,107 +41,152 @@ const CartModal = ({ cart, total, onClose, onAdd, onRemove }) => {
         WebkitTapHighlightColor: 'transparent',
       }}
     >
+      {/* OVERLAY - Tap here to close */}
       <div
-        className="bg-black/80 backdrop-blur-sm transition-opacity outline-none focus:outline-none focus-visible:outline-none"
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
         onClick={onClose}
-        aria-hidden
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          WebkitTapHighlightColor: 'transparent',
-        }}
+        aria-hidden="true"
       />
 
-      {/* Sheet: lighter than page for clear separation */}
-      <div className="relative w-full max-w-md rounded-t-3xl border-t border-white/10 shadow-2xl p-6 animate-slide-up max-h-[85vh] overflow-y-auto bg-[#0f1419] outline-none focus:outline-none focus-visible:outline-none" style={{ WebkitTapHighlightColor: 'transparent' }}>
-        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+      {/* Sheet Container */}
+      <div 
+        className="relative w-full max-w-md rounded-t-3xl border-t border-white/10 shadow-2xl bg-[#0f1419] flex flex-col max-h-[85vh] animate-slide-up overflow-hidden"
+        onClick={(e) => e.stopPropagation()} 
+      >
 
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-xl font-bold text-white tracking-wide">Your Order</h2>
-          <button onClick={onClose} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors outline-none focus:outline-none focus-visible:outline-none" style={{ WebkitTapHighlightColor: 'transparent' }}>
-            <X size={20} className="text-gray-400" />
-          </button>
+        {/* --- STICKY HEADER SECTION --- */}
+        <div className="bg-[#0f1419] px-6 pt-3 pb-4 border-b border-white/5">
+          {/* Drag Handle Area */}
+          <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-xl font-bold text-white tracking-wide">
+              Your Order
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors active:scale-90"
+            >
+              <X size={20} className="text-gray-400" />
+            </button>
+          </div>
+          <p className="text-gray-500 text-xs">
+            Review items and total — tap Place Order to open WhatsApp
+          </p>
         </div>
-        <p className="text-gray-500 text-xs mb-3">Review items and total — tap Place Order to open WhatsApp</p>
 
-        {/* Info line: neutral, no blue — subtle bg only */}
-        <div className="rounded-lg bg-white/5 px-3 py-2 mb-5">
-          <span className="text-gray-500 text-xs">Free delivery · Confirm your order on WhatsApp</span>
-        </div>
-
-        {/* Item rows: compact, Swiggy-like density */}
-        <div className="space-y-2.5 mb-6">
-          {cart.map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-2 py-0">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className={`w-2.5 h-2.5 rounded-sm border flex-shrink-0 flex items-center justify-center p-[1px] ${item.name.toLowerCase().includes('veg') && !item.name.toLowerCase().includes('non') ? 'border-green-500' : 'border-red-500'}`}>
-                  <div className={`w-full h-full rounded-full ${item.name.toLowerCase().includes('veg') && !item.name.toLowerCase().includes('non') ? 'bg-green-500' : 'bg-red-500'}`} />
+        {/* --- SCROLLABLE CONTENT (Items & Bill) --- */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 no-scrollbar">
+          {/* Items List */}
+          <div className="space-y-5 mb-8">
+            {cart.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-4"
+              >
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-gray-100 font-medium text-base truncate">
+                    {item.name}
+                  </h4>
+                  <p className="text-gray-500 text-sm mt-1">
+                    ₹{item.price} × {item.qty} = ₹{item.price * item.qty}
+                  </p>
                 </div>
-                <div className="min-w-0">
-                  <h4 className="text-gray-100 font-medium text-[13px] leading-tight truncate">{item.name}</h4>
-                  <p className="text-gray-500 text-[11px] leading-tight">₹{item.price} × {item.qty} = ₹{item.price * item.qty}</p>
+
+                {/* Quantity Control */}
+                <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 h-10 w-[100px] shadow-sm flex-shrink-0">
+                  <button
+                    onClick={() => onRemove(item.id)}
+                    className="w-9 h-full flex items-center justify-center text-emerald-700 hover:bg-emerald-50 rounded-l-xl active:scale-90 transition-all"
+                  >
+                    <Minus size={16} strokeWidth={3} />
+                  </button>
+                  <span className="text-emerald-700 text-sm font-extrabold tabular-nums">
+                    {item.qty}
+                  </span>
+                  <button
+                    onClick={() => onAdd(item)}
+                    className="w-9 h-full flex items-center justify-center text-emerald-700 hover:bg-emerald-50 rounded-r-xl active:scale-90 transition-all"
+                  >
+                    <Plus size={16} strokeWidth={3} />
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-0.5 flex-shrink-0">
-                <button onClick={() => onRemove(item.id)} className="min-w-[32px] min-h-[32px] flex items-center justify-center rounded-full border border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-colors outline-none focus:outline-none focus-visible:outline-none" style={{ WebkitTapHighlightColor: 'transparent' }}>
-                  <Minus size={12} strokeWidth={2.5} />
-                </button>
-                <span className="text-white text-xs font-medium w-5 text-center tabular-nums">{item.qty}</span>
-                <button onClick={() => onAdd(item)} className="min-w-[32px] min-h-[32px] flex items-center justify-center rounded-full border border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-colors outline-none focus:outline-none focus-visible:outline-none" style={{ WebkitTapHighlightColor: 'transparent' }}>
-                  <Plus size={12} strokeWidth={2.5} />
-                </button>
-              </div>
+            ))}
+          </div>
+
+          {/* Bill Details Block */}
+          <div className="bg-white/5 rounded-2xl p-5 mb-4">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+              Bill Details
+            </h3>
+            <div className="flex justify-between text-sm text-gray-300 mb-2.5">
+              <span>Item Total</span>
+              <span>₹{total}</span>
             </div>
-          ))}
+            <div className="flex justify-between text-sm text-gray-300 mb-3 border-b border-white/5 pb-3">
+              <span>Delivery</span>
+              <span className={total >= 199 ? "text-emerald-400" : "text-gray-400"}>
+                {total >= 199 ? "Free" : "Calculated at confirmation"}
+              </span>
+            </div>
+            <div className="flex justify-between text-lg font-bold text-white pt-2">
+              <span>To Pay</span>
+              <span>₹{total}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Bill details */}
-        <div className="bg-white/5 rounded-xl p-5 mb-24">
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Bill Details</h3>
-          <div className="flex justify-between text-sm text-gray-300 mb-2.5">
-            <span>Item Total</span>
-            <span className="tabular-nums">₹{total}</span>
-          </div>
-          <div className="flex justify-between text-sm text-gray-300 mb-3 border-b border-white/5 pb-3">
-            <span>Delivery</span>
-            <span className="text-emerald-400">Free</span>
-          </div>
-          <div className="flex justify-between text-base font-bold text-white pt-1">
-            <span>To Pay</span>
-            <span className="tabular-nums">₹{total}</span>
-          </div>
-          <p className="text-gray-500 text-xs mt-3">Free delivery for orders within 2 km</p>
-        </div>
-
-        {/* Place Order: primary CTA focus */}
-        <div className="absolute bottom-0 left-0 w-full p-4 bg-[#0f1419] border-t border-white/10" style={{ paddingBottom: 'max(1rem, calc(1rem + env(safe-area-inset-bottom, 0px)))' }}>
+        {/* --- STICKY BOTTOM SECTION --- */}
+        <div
+          className="w-full px-6 pt-4 pb-6 bg-[#0f1419] border-t border-white/5"
+          style={{
+            paddingBottom:
+              'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))',
+          }}
+        >
           {showRedirectNote ? (
-            <p className="text-center text-sm text-emerald-400/90 py-2 flex items-center justify-center gap-2">
-              <MessageCircle size={16} /> You'll be redirected to WhatsApp — tap Send there to confirm.
+            <p className="text-center text-base text-emerald-400 py-3 flex items-center justify-center gap-2">
+              <MessageCircle size={18} />
+              Redirecting to WhatsApp...
             </p>
           ) : (
             <>
               <button
                 type="button"
                 onClick={handlePlaceOrder}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl flex items-center justify-between px-6 shadow-lg shadow-emerald-900/30 active:scale-[0.98] transition-all outline-none focus:outline-none focus-visible:outline-none"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
+                className="w-full relative overflow-hidden
+                           bg-gradient-to-b from-emerald-500 to-emerald-600
+                           text-white font-semibold
+                           py-6
+                           rounded-[36px]
+                           flex items-center justify-between px-8
+                           shadow-[0_16px_45px_rgba(16,185,129,0.45)]
+                           active:scale-[0.96]
+                           transition-all duration-200 ease-out"
               >
-                <span className="text-sm opacity-90">Total · ₹{total}</span>
-                <span className="flex items-center gap-2">
+                <div className="flex flex-col items-start relative z-10">
+                  <span className="text-[11px] uppercase tracking-wider opacity-80">
+                    Total
+                  </span>
+                  <span className="text-2xl leading-none mt-1 font-bold">
+                    ₹{total}
+                  </span>
+                </div>
+
+                <span className="flex items-center gap-3 text-lg relative z-10 font-semibold">
                   Place Order
-                  <ChevronRight size={20} strokeWidth={2.5} />
+                  <ChevronRight size={22} strokeWidth={2.8} />
                 </span>
               </button>
-              <p className="text-center text-[10px] text-gray-500 mt-2.5">
-                Opens WhatsApp with your order — tap Send to confirm
+
+              <p className="text-center text-[10px] text-gray-500 mt-4 font-medium italic">
+                Opens WhatsApp — tap Send to confirm order
               </p>
             </>
           )}
         </div>
+
       </div>
     </div>,
     document.body
